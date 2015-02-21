@@ -17,7 +17,7 @@ GREEN_BUTTON = 32
 BLUE_BUTTON = 33
 
 # How fast to write data to the robot
-OUTPUT_INTERVAL = 0.3
+OUTPUT_INTERVAL = 0.05
 
 class MSIControlBoard:
 	happDevice = None		# Happ Control Board for input
@@ -66,7 +66,6 @@ class MSIControlBoard:
 		"""Stops the active monitor and output threads.
 		"""
 		self.active = False
-		self.disconnectFromRobot()
 
 		if self.monitorThread:
 			if self.monitorThread.isAlive():
