@@ -1,8 +1,9 @@
 import os
+import math
 import pygame
 from pygame.locals import *
 
-FPS = 4
+FPS = 60
 
 riceImgPath = "../../resources/rice.png"
 mrslImgPath = "../../resources/mrsl.png"
@@ -24,16 +25,25 @@ class Display:
 	SIZE = (640, 480)
 
 	mode = 0
+	oscillator = 0
+	tick = 0
 
-	def __init__(self):
+	def __init__(self, fb = False):
+
+		if fb:
+			driver = 'directfb'
+			if not os.getenv('SDL_VIDEODRIVER'):
+				os.putenv('SDL_VIDEODRIVER', driver)
+
 		pygame.display.init()
+		pygame.font.init()
 
 		self.clock = pygame.time.Clock()
 
-		# size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-		# screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+		self.SIZE = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+		self.screen = pygame.display.set_mode(self.SIZE, pygame.FULLSCREEN | pygame.DOUBLEBUF, 32)
 
-		self.screen = pygame.display.set_mode(self.SIZE, pygame.DOUBLEBUF, 32)
+		# self.screen = pygame.display.set_mode(self.SIZE, pygame.DOUBLEBUF, 32)
 
 		pygame.display.set_caption("MRSL r-one Exhibit")
 
@@ -45,6 +55,8 @@ class Display:
 
 		mrslImg = self.openImage("../../resources/mrsl.png")
 		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)
+
+		self.font = pygame.font.Font("freesansbold.ttf", 30)
 
 	def openImage(self, filename):
 		return pygame.image.load(filename).convert_alpha()
@@ -58,6 +70,7 @@ class Display:
 
 	def drawSquares(self):
 		SHADOW = 4
+		PULSE = 2
 
 		for index in xrange(4):
 			if index == 0:
@@ -85,26 +98,38 @@ class Display:
 					color = Colors.OFFYELLOW
 
 			rect = [50, 125 + index * 85, 60, 60]
+
 			rect[0] += SHADOW
 			rect[1] += SHADOW
-			pygame.draw.rect(self.screen, Colors.OFFGREY, rect)
+
+			if self.mode == index:
+				c = 60 - self.oscillator * 30
+				shadowColor = (c, c, c)
+			else:
+				shadowColor = Colors.OFFGREY
+			pygame.draw.rect(self.screen, shadowColor, rect)
 
 			rect[0] -= SHADOW
 			rect[1] -= SHADOW
+
+			if self.mode == index:
+				rect[0] += self.oscillator * PULSE
+				rect[1] += self.oscillator * PULSE
+
 			pygame.draw.rect(self.screen, color, rect)
 
-	def drawDialog(self):
+	def drawDialogBox(self):
 		LW = 3
 
 		# Draw 3 sides
 		pygame.draw.line(self.screen, Colors.OFFBLACK,
-			(125, 115), (610, 115), LW)
+			(125, 115), (600, 115), LW)
 
 		pygame.draw.line(self.screen, Colors.OFFBLACK,
-			(610, 115), (610, 450), LW)
+			(600, 115), (600, 450), LW)
 
 		pygame.draw.line(self.screen, Colors.OFFBLACK,
-			(610, 450), (125, 450), 2)
+			(600, 450), (125, 450), 2)
 
 		# Draw interesting sides
 		pygame.draw.line(self.screen, Colors.OFFBLACK,
@@ -137,6 +162,10 @@ class Display:
 			LW
 		)
 
+	def drawDialog(self):
+		text = self.font.render("Follow the leader!", True, Colors.OFFBLACK)
+		self.screen.blit(text, (135, 125))
+
 
 	def updateDisplay(self):
 		# Draw title bar
@@ -152,9 +181,14 @@ class Display:
 		self.drawSquares()
 
 		# Draw dialog
+		self.drawDialogBox()
 		self.drawDialog()
 
 		pygame.display.flip()
+
+
+	def oscillatorUpdate(self):
+		self.oscillator = math.sin(pygame.time.get_ticks() / 200.0)
 
 	def _mainloop(self):
 		while True:
@@ -163,9 +197,10 @@ class Display:
 					pygame.quit()
 
 			self.updateDisplay()
+			self.oscillatorUpdate()
 
-			self.mode += 1
-			self.mode %= 4
+			# self.mode += 1
+			# self.mode %= 4
 
 			self.clock.tick(FPS)
 
