@@ -76,7 +76,7 @@ class RoneRobot:
 			self.connection = Serial(
 				candidates[0],
 				baudrate = 230400,
-				timeout = 10
+				timeout = 1
 			)
 
 			print "Host robot connected!"
@@ -95,7 +95,7 @@ class RoneRobot:
 	def processLine(self, line):
 		"""Processes input from the robot. Does some action. Maybe.
 		"""
-		pass
+		print line
 
 
 	def _monitor(self):
@@ -109,17 +109,28 @@ class RoneRobot:
 				continue
 
 			try:
-				# data = self.connection.readline()
+				data = self.connection.read(1)
+
+				print data
 
 				# if data:
 				# 	self.processLine(data)
 
-				pass
-
 			except:
 				self.disconnectFromRobot()
 
+			# time.sleep(0.3)
 
 
+if __name__ == "__main__":
+	hostRobot = RoneRobot()
+	hostRobot.start()
 
+	try:
+		while True:
+			pass
+
+	except KeyboardInterrupt:
+		hostRobot.stop()
+		sys.exit()
 

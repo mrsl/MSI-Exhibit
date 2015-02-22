@@ -1,5 +1,8 @@
 import os
+import threading
+import time
 import math
+import signal
 import pygame
 from pygame.locals import *
 
@@ -8,7 +11,23 @@ FPS = 60
 riceImgPath = "../../resources/rice.png"
 mrslImgPath = "../../resources/mrsl.png"
 
+def selfsigint(display):
+	while not display.active:
+		pass
+
+	os.kill(os.getpid(), signal.SIGINT)
+
+def hackFix(display):
+	thread = threading.Thread(
+		target = selfsigint,
+		name = "Hack fix",
+		args = [display]
+	)
+	thread.start()
+
 class Colors:
+	"""Various pretty colors for the display.
+	"""
 	OFFWHITE = (240, 240, 240)
 	OFFBLACK = (20, 20, 20)
 	OFFGREY = (60, 60, 60)
@@ -28,28 +47,48 @@ class Display:
 	oscillator = 0
 	tick = 0
 
-	def __init__(self, fb = False):
+	active = False
 
-		if fb:
-			driver = 'directfb'
-			if not os.getenv('SDL_VIDEODRIVER'):
-				os.putenv('SDL_VIDEODRIVER', driver)
+	def __init__(self, msiBoard):
+		hackFix(self)
 
+		self.msiBoard = msiBoard
+
+	def start(self):
+		# Set fbcon to be the driver for display
+		if not os.getenv('SDL_VIDEODRIVER'):
+			os.putenv('SDL_VIDEODRIVER', 'fbcon')
+
+		# Initialize pygame
 		pygame.display.init()
 		pygame.font.init()
 
+		# Flag to signal hackfix to enable framebuffer
+		self.active = True
+
 		self.clock = pygame.time.Clock()
 
-		self.SIZE = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-		self.screen = pygame.display.set_mode(self.SIZE, pygame.FULLSCREEN | pygame.DOUBLEBUF, 32)
+		# Set size to screen's maximum size
+		self.size = (
+			pygame.display.Info().current_w,
+			pygame.display.Info().current_h
+		)
 
-		# self.screen = pygame.display.set_mode(self.SIZE, pygame.DOUBLEBUF, 32)
+		# Set display mode
+		self.screen = pygame.display.set_mode(
+			self.SIZE,
+			pygame.FULLSCREEN,
+			32
+		)
 
-		pygame.display.set_caption("MRSL r-one Exhibit")
+		# Hide mouse
+		pygame.mouse.set_visible(False)
 
+		# Create background
 		self.background = pygame.Surface(self.screen.get_size())
 		self.background.fill(Colors.OFFWHITE)
 
+		# Open resources
 		riceImg = self.openImage("../../resources/rice.png")
 		self.riceImg = self.scaleImageOnHeight(riceImg, 100)
 
@@ -57,6 +96,18 @@ class Display:
 		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)
 
 		self.font = pygame.font.Font("freesansbold.ttf", 30)
+
+		self.thread = threading.Thread(
+			target = self._mainloop,
+			name = "Display"
+		)
+
+		self.thread.daemon = True
+
+		self.thread.start()
+
+	def stop(self):
+		self.active = False
 
 	def openImage(self, filename):
 		return pygame.image.load(filename).convert_alpha()
@@ -191,10 +242,24 @@ class Display:
 		self.oscillator = math.sin(pygame.time.get_ticks() / 200.0)
 
 	def _mainloop(self):
-		while True:
+		while self.active:
 			for event in pygame.event.get():
 				if event.type == QUIT:
 					pygame.quit()
+
+			status = self.msiBoard.getStatus()
+
+			if status['r']:
+				self.mode = 0
+
+			elif status['g']:
+				self.mode = 1
+
+			elif status['b']:
+				self.mode = 2
+
+			elif status['y']:
+				self.mode = 3
 
 			self.updateDisplay()
 			self.oscillatorUpdate()
@@ -204,7 +269,8 @@ class Display:
 
 			self.clock.tick(FPS)
 
+
 if __name__ == "__main__":
 	display = Display()
-
+	display.start()
 	display._mainloop()

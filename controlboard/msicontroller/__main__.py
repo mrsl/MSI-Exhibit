@@ -5,12 +5,15 @@ import time
 import threading
 
 import msicontrolboard
+import display
 
 if __name__ == "__main__":
 	msiBoard = msicontrolboard.MSIControlBoard()
 	msiBoard.start()
 
-	# Busy wait
+	display = display.Display(msiBoard)
+	display.start()
+
 	try:
 		while True:
 			pass

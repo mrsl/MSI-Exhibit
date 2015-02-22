@@ -1,3 +1,4 @@
+import sys
 import copy
 import time
 import threading
@@ -67,6 +68,9 @@ class MSIControlBoard:
 		"""
 		self.active = False
 
+		self.happDevice.stop()
+		self.hostRobot.stop()
+
 		if self.monitorThread:
 			if self.monitorThread.isAlive():
 				self.monitorThread.join()
@@ -78,7 +82,6 @@ class MSIControlBoard:
 				self.outputThread.join()
 
 			self.outputThread = None
-
 
 	def updateStatus(self):
 		"""Updates status of all keys on the board. Returns True if
@@ -164,7 +167,25 @@ class MSIControlBoard:
 				self.line = self.getCommandLine()
 				print "Output!", self.line
 
+	def getStatus(self):
+		return self.status
+
 	def _output(self):
 		while self.active:
 			self.sendCommandLine(self.line)
 			time.sleep(OUTPUT_INTERVAL)
+
+if __name__ == "__main__":
+	msiBoard = MSIControlBoard()
+	msiBoard.start()
+
+	# display = display.Display(msiBoard)
+	# display.start()
+
+	try:
+		while True:
+			pass
+
+	except KeyboardInterrupt:
+		msiBoard.stop()
+		sys.exit(0)
