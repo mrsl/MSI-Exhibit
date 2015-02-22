@@ -50,16 +50,17 @@ class Display:
 	active = False
 
 	def __init__(self, msiBoard):
-		hackFix(self)
+		# hackFix(self)
 
 		self.msiBoard = msiBoard
 
 	def start(self):
 		# Set fbcon to be the driver for display
-		if not os.getenv('SDL_VIDEODRIVER'):
-			os.putenv('SDL_VIDEODRIVER', 'fbcon')
+		# if not os.getenv('SDL_VIDEODRIVER'):
+		# 	os.putenv('SDL_VIDEODRIVER', 'fbcon')
 
 		# Initialize pygame
+		
 		pygame.display.init()
 		pygame.font.init()
 
@@ -77,7 +78,8 @@ class Display:
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			pygame.FULLSCREEN,
+			# pygame.FULLSCREEN,
+			pygame.DOUBLEBUF,
 			32
 		)
 
@@ -97,14 +99,14 @@ class Display:
 
 		self.font = pygame.font.Font("freesansbold.ttf", 30)
 
-		self.thread = threading.Thread(
-			target = self._mainloop,
-			name = "Display"
-		)
+		# self.thread = threading.Thread(
+		#	target = self._mainloop,
+		#	name = "Display"
+		#)
 
-		self.thread.daemon = True
+		#self.thread.daemon = True
 
-		self.thread.start()
+		#self.thread.start()
 
 	def stop(self):
 		self.active = False
@@ -247,8 +249,8 @@ class Display:
 				if event.type == QUIT:
 					pygame.quit()
 
-			status = self.msiBoard.getStatus()
-
+			# status = self.msiBoard.getStatus()
+			"""
 			if status['r']:
 				self.mode = 0
 
@@ -260,7 +262,7 @@ class Display:
 
 			elif status['y']:
 				self.mode = 3
-
+			"""
 			self.updateDisplay()
 			self.oscillatorUpdate()
 
@@ -271,6 +273,6 @@ class Display:
 
 
 if __name__ == "__main__":
-	display = Display()
+	display = Display(None)
 	display.start()
 	display._mainloop()
