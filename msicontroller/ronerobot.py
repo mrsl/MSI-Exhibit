@@ -95,7 +95,8 @@ class RoneRobot:
 	def processLine(self, line):
 		"""Processes input from the robot. Does some action. Maybe.
 		"""
-		print line
+		# print line
+		pass
 
 
 	def _monitor(self):
@@ -111,7 +112,7 @@ class RoneRobot:
 			try:
 				data = self.connection.read(1)
 
-				print data
+				# print data
 
 				# if data:
 				# 	self.processLine(data)

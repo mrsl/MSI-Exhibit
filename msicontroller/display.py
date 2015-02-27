@@ -7,10 +7,7 @@ import signal
 import pygame
 from pygame.locals import *
 
-FPS = 60
-
-riceImgPath = "../../resources/rice.png"
-mrslImgPath = "../../resources/mrsl.png"
+FPS = 15 
 
 def selfsigint(display):
 	while not display.active:
@@ -79,8 +76,7 @@ class Display:
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			# pygame.FULLSCREEN,
-			pygame.DOUBLEBUF,
+			pygame.FULLSCREEN | pygame.DOUBLEBUF,
 			32
 		)
 
@@ -92,10 +88,10 @@ class Display:
 		self.background.fill(Colors.OFFWHITE)
 
 		# Open resources
-		riceImg = self.openImage("../../resources/rice.png")
+		riceImg = self.openImage("resources/rice.png")
 		self.riceImg = self.scaleImageOnHeight(riceImg, 100)
 
-		mrslImg = self.openImage("../../resources/mrsl.png")
+		mrslImg = self.openImage("resources/mrsl.png")
 		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)
 
 		self.font = pygame.font.Font("freesansbold.ttf", 30)
@@ -125,7 +121,7 @@ class Display:
 		return pygame.transform.smoothscale(image, size)
 
 	def openImageArray(self, directoryName, height):
-		files = glob.glob("../../resources/%s/*.png" % directoryName)
+		files = glob.glob("resources/%s/*.png" % directoryName)
 		files.sort()
 
 		files = [self.scaleImageOnHeight(self.openImage(fname), height)
