@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import glob
 import math
 import signal
 import pygame
@@ -50,14 +51,14 @@ class Display:
 	active = False
 
 	def __init__(self, msiBoard):
-		# hackFix(self)
+		hackFix(self)
 
 		self.msiBoard = msiBoard
 
 	def start(self):
 		# Set fbcon to be the driver for display
-		# if not os.getenv('SDL_VIDEODRIVER'):
-		# 	os.putenv('SDL_VIDEODRIVER', 'fbcon')
+		if not os.getenv('SDL_VIDEODRIVER'):
+			os.putenv('SDL_VIDEODRIVER', 'fbcon')
 
 		# Initialize pygame
 		
@@ -99,14 +100,16 @@ class Display:
 
 		self.font = pygame.font.Font("freesansbold.ttf", 30)
 
-		# self.thread = threading.Thread(
-		#	target = self._mainloop,
-		#	name = "Display"
-		#)
+		self.buildImgs = self.openImageArray("build", 250)
 
-		#self.thread.daemon = True
+		self.thread = threading.Thread(
+			target = self._mainloop,
+			name = "Display"
+		)
 
-		#self.thread.start()
+		self.thread.daemon = True
+
+		self.thread.start()
 
 	def stop(self):
 		self.active = False
@@ -120,6 +123,15 @@ class Display:
 		size = (int(aspect * height), height)
 
 		return pygame.transform.smoothscale(image, size)
+
+	def openImageArray(self, directoryName, height):
+		files = glob.glob("../../resources/%s/*.png" % directoryName)
+		files.sort()
+
+		files = [self.scaleImageOnHeight(self.openImage(fname), height)
+			for fname in files]
+
+		return files
 
 	def drawSquares(self):
 		SHADOW = 4
@@ -219,6 +231,15 @@ class Display:
 		text = self.font.render("Follow the leader!", True, Colors.OFFBLACK)
 		self.screen.blit(text, (135, 125))
 
+		self.displayImageArray((145, 165), self.buildImgs, 600)
+
+	def displayImageArray(self, loc, imageArray, rate):
+		tick = pygame.time.get_ticks() % (len(imageArray) * rate)
+
+		for i in xrange(len(imageArray)):
+			if tick < rate * (i + 1):
+				self.screen.blit(imageArray[i], loc)
+				break
 
 	def updateDisplay(self):
 		# Draw title bar
@@ -249,8 +270,8 @@ class Display:
 				if event.type == QUIT:
 					pygame.quit()
 
-			# status = self.msiBoard.getStatus()
-			"""
+			status = self.msiBoard.getStatus()
+
 			if status['r']:
 				self.mode = 0
 
@@ -262,7 +283,7 @@ class Display:
 
 			elif status['y']:
 				self.mode = 3
-			"""
+
 			self.updateDisplay()
 			self.oscillatorUpdate()
 
