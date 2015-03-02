@@ -27,8 +27,6 @@ class AnalogJoystick:
 
 
 	def stop(self):
-		self.stop()
-
 		if self.device:
 			self.device.close()
 
