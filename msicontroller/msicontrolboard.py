@@ -75,6 +75,7 @@ class MSIControlBoard:
 
 		self.happDevice.stop()
 		self.hostRobot.stop()
+		self.joystick.stop()
 
 		if self.monitorThread:
 			if self.monitorThread.isAlive():
