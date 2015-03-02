@@ -38,6 +38,7 @@ class AnalogJoystick:
 
 			for device in devices:
 				self.device = open(device, 'r')
+				print "Joystick connected!"
 
 		except IOError:
 			pass
@@ -48,91 +49,115 @@ class AnalogJoystick:
 		percent254 = (float(num) - 128.0) / 126.0
 		percent128 = float(num) / 127.0
 
+		readStat = {}
+
 		if msg[6] == '01': # Button
 			if msg[4] == '01':
-				self.status[msg[7]] = True
+				readStat[msg[7]] = True
 			else:
-				self.status[msg[7]] = False
+				readStat[msg[7]] = False
 
 		elif msg[7] == '04': # D-pad left/right
 			if msg[4] == 'FF':
-				self.status['w'] = True
+				readStat['dw'] = True
 			elif msg[4] == '01':
-				self.status['e'] = True
+				readStat['de'] = True
 			else:
-				self.status['w'] = False
-				self.status['e'] = False
+				readStat['dw'] = False
+				readStat['de'] = False
 
 		elif msg[7] == '05': # D-pad up/down
 			if msg[4] == 'FF':
-				self.status['s'] = True
+				readStat['ds'] = True
 			elif msg[4] == '01':
-				self.status['n'] = True
+				readStat['dn'] = True
 			else:
-				self.status['n'] = False
-				self.status['s'] = False
+				readStat['dn'] = False
+				readStat['ds'] = False
 
 		elif msg[7] == '00': # Left Joystick left/right
 			if num >= 128:
-				self.status['llr'] = -1 + percent254
+				readStat['llr'] = -1 + percent254
 			elif num <= 127 and num != 0:
-				self.status['llr'] = percent128
+				readStat['llr'] = percent128
 			else:
-				self.status['lr'] = 0
+				readStat['lr'] = 0
 
 		elif msg[7] == '01': # Left Joystick up/down
 			if num >= 128:
-				self.status['lud'] = 1 - percent254
+				readStat['lud'] = 1 - percent254
 			elif num <= 127 and num != 0:
-				self.status['lud'] = -percent128
+				readStat['lud'] = -percent128
 			else:
-				self.status['lud'] = 0
+				readStat['lud'] = 0
 
 		elif msg[7] == '02': # Right Joystick left/right
 			if num >= 128:
-				self.status['rlr'] = -1 + percent254
+				readStat['rlr'] = -1 + percent254
 			elif num <= 127 and num != 0:
-				self.status['rlr'] = percent128
+				readStat['rlr'] = percent128
 			else:
-				self.status['rlr'] = 0
+				readStat['rlr'] = 0
 
 		elif msg[7] == '03': # Right Joystick up/ down
 			if num >= 128:
-				self.status['rud'] = 1 - percent254
+				readStat['rud'] = 1 - percent254
 			elif num <= 127 and num != 0:
-				self.status['rud'] = -percent128
+				readStat['rud'] = -percent128
 			else:
-				self.status['rud'] = 0
+				readStat['rud'] = 0
 
-		if 'rud' in self.status:
-			if not self.status['n'] and not self.status['s']:
-				if self.status['rud'] > .5:
-					self.status['s'] = False
-					self.status['n'] = True
+		if 'lud' in readStat:
+			if readStat['lud'] > .5:
+				self.status['s'] = False
+				self.status['n'] = True
 
-				elif self.status['rud'] < -.5:
-					self.status['n'] = False
-					self.status['s'] = True
+			elif readStat['lud'] < -.5:
+				self.status['n'] = False
+				self.status['s'] = True
 
-				else:
-					self.status['n'] = False
-					self.status['s'] = False
+			else:
+				self.status['n'] = False
+				self.status['s'] = False
+		else:
+			self.status['n'] = False
+			self.status['s'] = False
 
-		if 'rlr' in self.status:
-			if not self.status['e'] and not self.status['w']:
-				if self.status['rlr'] > .5:
-					self.status['w'] = False
-					self.status['e'] = True
+		if 'llr' in readStat:
+			if readStat['llr'] > .5:
+				self.status['w'] = False
+				self.status['e'] = True
 
-				elif self.status['rlr'] < -.5:
-					self.status['e'] = False
-					self.status['w'] = True
+			elif readStat['llr'] < -.5:
+				self.status['e'] = False
+				self.status['w'] = True
 
-				else:
-					self.status['e'] = False
-					self.status['w'] = False
+			else:
+				self.status['e'] = False
+				self.status['w'] = False
+		else:
+			self.status['e'] = False
+			self.status['w'] = False
 
-		print self.status
+		if '00' in readStat:
+			self.status['r'] = readStat['00']
+		else:
+			self.status['r'] = False
+
+		if '01' in readStat:
+			self.status['g'] = readStat['01']
+		else:
+			self.status['g'] = False
+
+		if '02' in readStat:
+			self.status['b'] = readStat['02']
+		else:
+			self.status['b'] = False
+
+		if '03' in readStat:
+			self.status['y'] = readStat['03']
+		else:
+			self.status['y'] = False
 
 	def _monitor(self):
 		msg = []
@@ -141,6 +166,7 @@ class AnalogJoystick:
 			if not self.device:
 				self.attemptConnect()
 				continue
+
 
 			try:
 				for char in self.device.read(1):

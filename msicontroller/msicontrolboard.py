@@ -5,6 +5,7 @@ import threading
 
 import happ
 import ronerobot
+import analogjoystick
 
 # Values of keys on the Happ device
 EAST_STICK = 8
@@ -23,6 +24,7 @@ OUTPUT_INTERVAL = 0.05
 class MSIControlBoard:
 	happDevice = None		# Happ Control Board for input
 	hostRobot = None		# Host robot to use for output
+	joystick = None			# Analog joystick for other input
 	line = "UI000000000000\n"	# Line to output to host robot
 
 	active = False			# Is the monitor thread active
@@ -38,6 +40,9 @@ class MSIControlBoard:
 		"""
 		self.happDevice = happ.HappDevice()
 		self.happDevice.start()
+
+		self.joystick = analogjoystick.AnalogJoystick()
+		self.joystick.start()
 
 		self.hostRobot = ronerobot.RoneRobot()
 		self.hostRobot.start()
@@ -108,6 +113,19 @@ class MSIControlBoard:
 
 		return diff
 
+	def updateStatusJoystick(self):
+		oldStatus = copy.copy(self.status)
+
+		self.status = copy.copy(self.joystick.status)
+
+		diff = False
+
+		for key in oldStatus.keys():
+			if self.status[key] != oldStatus[key]:
+				diff = True
+				break
+
+		return diff
 
 	def getCommandLine(self):
 		"""Finds the command line to send to the robot from the keys
@@ -161,7 +179,13 @@ class MSIControlBoard:
 
 	def _monitor(self):
 		while self.active:
-			f = self.updateStatus()
+			f = False
+
+			if self.happDevice.device:
+				f = self.updateStatus()
+
+			if self.joystick.device and not self.happDevice.device:
+				f = self.updateStatusJoystick()	
 
 			if f:
 				self.line = self.getCommandLine()

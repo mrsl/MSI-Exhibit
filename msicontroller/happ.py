@@ -269,7 +269,7 @@ class HappDevice:
 		"""
 		inputs = []
 
-		while True and self.active:
+		while self.active:
 			# If there is no device, try to set one up
 			if not self.device:
 				self.setupDevice()
