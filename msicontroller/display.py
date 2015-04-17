@@ -7,7 +7,7 @@ import signal
 import pygame
 from pygame.locals import *
 
-FPS = 15 
+FPS = 15
 
 def selfsigint(display):
 	while not display.active:
@@ -54,11 +54,11 @@ class Display:
 
 	def start(self):
 		# Set fbcon to be the driver for display
-		if not os.getenv('SDL_VIDEODRIVER'):
-			os.putenv('SDL_VIDEODRIVER', 'fbcon')
+		# if not os.getenv('SDL_VIDEODRIVER'):
+		# 	os.putenv('SDL_VIDEODRIVER', 'fbcon')
 
 		# Initialize pygame
-		
+
 		pygame.display.init()
 		pygame.font.init()
 
