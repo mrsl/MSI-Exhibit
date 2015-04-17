@@ -11,8 +11,8 @@ if __name__ == "__main__":
 	msiBoard = msicontrolboard.MSIControlBoard()
 	msiBoard.start()
 
-	display = display.Display(msiBoard)
-	display.start()
+	# display = display.Display(msiBoard)
+	# display.start()
 
 	try:
 		while True:
