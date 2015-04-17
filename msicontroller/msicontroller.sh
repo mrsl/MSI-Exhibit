@@ -2,5 +2,5 @@
 pushd /home/mrsl/MSI-Exhibit/msicontroller
 #/usr/bin/python main.py
 /usr/bin/python main.py &
-kill -SIGINT $!
+kill -INT -$!
 popd
