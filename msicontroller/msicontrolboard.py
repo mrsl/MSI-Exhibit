@@ -4,6 +4,7 @@ import time
 import threading
 
 import happ
+import happ2
 import ronerobot
 import analogjoystick
 
@@ -23,6 +24,7 @@ OUTPUT_INTERVAL = 0.05
 
 class MSIControlBoard:
 	happDevice = None		# Happ Control Board for input
+	happDevice2 = None		# Happ Control Board for input
 	hostRobot = None		# Host robot to use for output
 	joystick = None			# Analog joystick for other input
 	line = "UI000000000000\n"	# Line to output to host robot
@@ -32,6 +34,7 @@ class MSIControlBoard:
 	outputThread = None		# Output thread
 
 	status = {}			# Status of all keys
+	stick = { 'x' : 0, 'y' : 0 }
 
 	def __init__(self):
 		"""Initializes both devices to be used on the board, the Happ
@@ -41,11 +44,24 @@ class MSIControlBoard:
 		self.happDevice = happ.HappDevice()
 		self.happDevice.start()
 
+		self.happDevice2 = happ2.HappFlyDevice()
+		self.happDevice2.start()
+
 		self.joystick = analogjoystick.AnalogJoystick()
 		self.joystick.start()
 
 		self.hostRobot = ronerobot.RoneRobot()
 		self.hostRobot.start()
+
+		self.status['e'] = False
+		self.status['n'] = False
+		self.status['s'] = False
+		self.status['w'] = False
+
+		self.status['r'] = False
+		self.status['y'] = False
+		self.status['g'] = False
+		self.status['b'] = False
 
 	def start(self):
 		"""Begins monitor thread and output thread.
@@ -74,6 +90,7 @@ class MSIControlBoard:
 		self.active = False
 
 		self.happDevice.stop()
+		self.happDevice2.stop()
 		self.hostRobot.stop()
 		self.joystick.stop()
 
@@ -105,28 +122,31 @@ class MSIControlBoard:
 		self.status['g'] = self.happDevice.getKeyStatus(GREEN_BUTTON)
 		self.status['b'] = self.happDevice.getKeyStatus(BLUE_BUTTON)
 
-		diff = False
+	def updateStatusFly(self):
+		oldStatus = copy.copy(self.status)
 
-		for key in oldStatus.keys():
-			if self.status[key] != oldStatus[key]:
-				diff = True
-				break
-
-		return diff
+		self.status['r'] = self.happDevice2.getKeyStatus(1)
+		self.status['g'] = self.happDevice2.getKeyStatus(2)
+		self.status['b'] = self.happDevice2.getKeyStatus(3)
+		self.status['y'] = self.happDevice2.getKeyStatus(4)
 
 	def updateStatusJoystick(self):
 		oldStatus = copy.copy(self.status)
 
-		self.status = copy.copy(self.joystick.status)
+		self.status['e'] = self.joystick.status['e']
+		self.status['n'] = self.joystick.status['n']
+		self.status['s'] = self.joystick.status['s']
+		self.status['w'] = self.joystick.status['w']
 
-		diff = False
+		self.stick['x'] = self.joystick.stick['x']
+		self.stick['y'] = self.joystick.stick['y']
 
-		for key in oldStatus.keys():
-			if self.status[key] != oldStatus[key]:
-				diff = True
-				break
+	def getNewCommandLine(self):
+		if not self.status:
+			return "UI000000\n"
 
-		return diff
+		return "UI000000\n"
+
 
 	def getCommandLine(self):
 		"""Finds the command line to send to the robot from the keys
@@ -185,12 +205,15 @@ class MSIControlBoard:
 			if self.happDevice.device:
 				f = self.updateStatus()
 
-			if self.joystick.device and not self.happDevice.device:
-				f = self.updateStatusJoystick()	
+			if self.happDevice2.device and \
+			    not self.happDevice.device:
+				f = self.updateStatusFly()
 
-			if f:
-				self.line = self.getCommandLine()
-				print "Output!", self.line
+			if self.joystick.device and not self.happDevice.device:
+				f = self.updateStatusJoystick()
+
+			self.line = self.getCommandLine()
+			# self.line = self.getNewCommandLine()
 
 	def getStatus(self):
 		return self.status

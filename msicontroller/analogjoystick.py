@@ -3,6 +3,7 @@ import glob
 
 class AnalogJoystick:
 	status = {}
+	stick = { 'x' : 0, 'y' : 0 }
 
 	active = False
 
@@ -106,6 +107,12 @@ class AnalogJoystick:
 				readStat['rud'] = 0
 
 		if 'lud' in readStat:
+			self.stick['y'] = readStat['lud']
+
+		if 'llr' in readStat:
+			self.stick['x'] = readStat['llr']
+
+		if 'lud' in readStat:
 			if readStat['lud'] > .5:
 				self.status['s'] = False
 				self.status['n'] = True
@@ -156,6 +163,7 @@ class AnalogJoystick:
 			self.status['y'] = readStat['03']
 		else:
 			self.status['y'] = False
+
 
 	def _monitor(self):
 		msg = []

@@ -15,7 +15,8 @@ class HappDevice:
 	edge of an input.
 	"""
 	VENDOR_ID = 0x078b	# USB vendor ID.
-	PRODUCT_ID = 0x0030	# USB product ID.
+	PRODUCT_ID1 = 0x0030	# USB product ID.
+	# PRODUCT_ID2 = 0x0020	# USB product ID.
 
 	reattach = False	# Have we detached from the kernel?
 	endpoint = None		# USB endpoint to read from.
@@ -28,7 +29,7 @@ class HappDevice:
 
 	device = None		# USB Device
 	thread = None		# Monitor thread.
- 
+
 	def __init__(self):
 		"""Constructor. Registers exit method.
 		"""
@@ -42,13 +43,19 @@ class HappDevice:
 		# Find device.
 		self.device = usb.core.find(
 			idVendor = self.VENDOR_ID,
-			idProduct = self.PRODUCT_ID
+			idProduct = self.PRODUCT_ID1
 		)
+
+                # if not self.device:
+                #     self.device = usb.core.find(
+                #             idVendor = self.VENDOR_ID,
+                #             idProduct = self.PRODUCT_ID2
+                #     )
 
 		if self.device:
 			# Detach device from kernel and configure the device.
 			print "Happ device connected!"
-			
+
 			self._detachDevice()
 			self._setConfiguration()
 			self._claimDevice()
@@ -107,14 +114,14 @@ class HappDevice:
 		except usb.core.USBError as e:
 			raise IOError("Can't detach driver: %s" % str(e))
 
-	
+
 	def _attachDevice(self):
 		"""Attaches the device to the kernel. Only works if the device
 		was previously detached.
 		"""
 		if not self.reattach:
 			return
-		
+
 		self.reattach = False
 
 		try:
@@ -125,7 +132,7 @@ class HappDevice:
 		except usb.core.USBError as e:
 			raise IOError("Can't attach driver: %s" % str(e))
 
-	
+
 	def _claimDevice(self):
 		"""Claims the device.
 		"""
@@ -142,14 +149,14 @@ class HappDevice:
 
 		except usb.core.USBError as e:
 			raise IOError("Can't release device: %s", str(e))
-		
+
 		usb.util.dispose_resources(self.device)
 
 
 	def _resetDevice(self):
 		"""Resets the device.
 		"""
-		try:	
+		try:
 			self.device.reset()
 
 		except usb.core.USBError as e:
@@ -173,6 +180,8 @@ class HappDevice:
 				for endpoint in interface:
 					endpoints.append(endpoint)
 
+                print endpoints
+
 		if not endpoints:
 			raise IOError("No endpoints.")
 
@@ -180,9 +189,9 @@ class HappDevice:
 			raise IOError("Incorrect number of endpoints.")
 
 		self.endpoint = endpoints[0]
+                self.endpoint2 = endpoints[1]
 
-
-	def readData(self, timeout = 0):
+	def readData(self, endpoint, timeout = 0):
 		"""Reads data from the device under specified timeout
 		constraint. A timeout of 0 will block until data is available.
 		Returns data read.
@@ -190,18 +199,18 @@ class HappDevice:
 		data = []
 		try:
 			data = self.device.read(
-				self.endpoint.bEndpointAddress,
-				self.endpoint.wMaxPacketSize,
+				endpoint.bEndpointAddress,
+				endpoint.wMaxPacketSize,
 				timeout = timeout
-			) 
-		
+			)
+
 		except usb.core.USBError as e:
 			# Timeout error.
 			if "timed" in str(e):
 				return data
 
 			raise IOError("Read error: %s" % str(e))
-		
+
 		return data
 
 
@@ -248,7 +257,7 @@ class HappDevice:
 					self.keyOffFunctions[onKey]()
 
 			self.onKeys[onKey] = False
-		
+
 		# Flag all inputs as on.
 		for inKey in inputs:
 			self.onKeys[inKey] = True
@@ -276,7 +285,9 @@ class HappDevice:
 				continue
 
 			try:
-				data = self.readData(1000)
+				# data = self.readData(self.endpoint, 1000)
+				data = self.readData(self.endpoint2, 1000)
+                                print data
 
 			# Device was unplugged, attempt to get it back
 			except IOError:
