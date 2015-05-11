@@ -145,7 +145,33 @@ class MSIControlBoard:
 		if not self.status:
 			return "UI000000\n"
 
-		return "UI000000\n"
+                x = self.stick['x']
+                y = self.stick['y']
+                x += 128
+                y += 128
+
+                line = "UI"
+
+                line += hex(x)[2:]
+                line += hex(y)[2:]
+
+		buttonValue = 0
+
+		if self.status['b']:
+			buttonValue += 1
+
+		if self.status['g']:
+			buttonValue += 2
+
+		if self.status['r']:
+			buttonValue += 4
+
+		if self.status['y']:
+			buttonValue += 8
+
+		line += "%0.2x" % buttonValue
+
+		return line + "\n"
 
 
 	def getCommandLine(self):
@@ -204,6 +230,8 @@ class MSIControlBoard:
 
 			if self.happDevice.device:
 				f = self.updateStatus()
+                                self.line = self.getCommandLine()
+                                continue
 
 			if self.happDevice2.device and \
 			    not self.happDevice.device:
@@ -212,8 +240,7 @@ class MSIControlBoard:
 			if self.joystick.device and not self.happDevice.device:
 				f = self.updateStatusJoystick()
 
-			self.line = self.getCommandLine()
-			# self.line = self.getNewCommandLine()
+			self.line = self.getNewCommandLine()
 
 	def getStatus(self):
 		return self.status
