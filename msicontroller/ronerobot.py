@@ -13,6 +13,7 @@ class RoneRobot:
 	connection = None	# Serial connection to robot
 	active = False		# Is the thread active?
 	thread = None		# Thread object for monitoring robot
+	line = ""
 
 	def __init__(self):
 		"""Constructor. Doesn't do much.
@@ -96,9 +97,14 @@ class RoneRobot:
 	def processLine(self, line):
 		"""Processes input from the robot. Does some action. Maybe.
 		"""
-		# print line
-		pass
+		self.line += line
 
+		if '\n' in line:
+			ss = self.line.split('\n')
+
+			print ss[0]
+
+			self.line = '\n'.join(ss[1:])
 
 	def _monitor(self):
 		"""Maintain connection with a robot. Stays robust to unplugging
@@ -115,8 +121,8 @@ class RoneRobot:
 
 				# print data
 
-				# if data:
-				# 	self.processLine(data)
+				if data:
+					self.processLine(data)
 
 			except:
 				self.disconnectFromRobot()

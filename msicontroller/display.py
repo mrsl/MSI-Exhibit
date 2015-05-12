@@ -76,7 +76,8 @@ class Display:
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			pygame.FULLSCREEN | pygame.DOUBLEBUF,
+			# pygame.FULLSCREEN | pygame.DOUBLEBUF,
+			pygame.DOUBLEBUF,
 			32
 		)
 
@@ -89,23 +90,16 @@ class Display:
 
 		# Open resources
 		riceImg = self.openImage("resources/rice.png")
-		self.riceImg = self.scaleImageOnHeight(riceImg, 100)
+		self.riceImg = self.scaleImageOnHeight(riceImg, 100)[0]
 
 		mrslImg = self.openImage("resources/mrsl.png")
-		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)
+		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)[0]
 
 		self.font = pygame.font.Font("freesansbold.ttf", 30)
 
 		self.buildImgs = self.openImageArray("build", 250)
 
-		self.thread = threading.Thread(
-			target = self._mainloop,
-			name = "Display"
-		)
-
-		self.thread.daemon = True
-
-		self.thread.start()
+                self._mainloop()
 
 	def stop(self):
 		self.active = False
@@ -118,7 +112,7 @@ class Display:
 		aspect = float(x) / y
 		size = (int(aspect * height), height)
 
-		return pygame.transform.smoothscale(image, size)
+		return pygame.transform.smoothscale(image, size), size
 
 	def openImageArray(self, directoryName, height):
 		files = glob.glob("resources/%s/*.png" % directoryName)
@@ -224,17 +218,29 @@ class Display:
 		)
 
 	def drawDialog(self):
-		text = self.font.render("Follow the leader!", True, Colors.OFFBLACK)
-		self.screen.blit(text, (135, 125))
+                text = ""
+                if self.mode == 0:
+                        text = "Following the leader!"
+                elif self.mode == 1:
+                        text = "Clustering together!"
+                elif self.mode == 2:
+                        text = "Flocking as one!"
+
+                text = self.font.render("Follow the leader!", True, Colors.OFFBLACK)
+
+                self.screen.blit(text, (135, 125))
 
 		self.displayImageArray((145, 165), self.buildImgs, 600)
 
 	def displayImageArray(self, loc, imageArray, rate):
-		tick = pygame.time.get_ticks() % (len(imageArray) * rate)
+                l = len(imageArray)
+                if not l:
+                    l = 1
+		tick = pygame.time.get_ticks() % (l * rate)
 
 		for i in xrange(len(imageArray)):
 			if tick < rate * (i + 1):
-				self.screen.blit(imageArray[i], loc)
+				self.screen.blit(imageArray[i][0], loc)
 				break
 
 	def updateDisplay(self):
@@ -266,7 +272,10 @@ class Display:
 				if event.type == QUIT:
 					pygame.quit()
 
-			status = self.msiBoard.getStatus()
+                        if (self.msiBoard):
+                            status = self.msiBoard.getStatus()
+                        else:
+                            status = { 'r' : 1, 'g' : 0, 'b' : 0, 'y' : 0 }
 
 			if status['r']:
 				self.mode = 0
@@ -283,8 +292,8 @@ class Display:
 			self.updateDisplay()
 			self.oscillatorUpdate()
 
-			# self.mode += 1
-			# self.mode %= 4
+			self.mode += 1
+			self.mode %= 4
 
 			self.clock.tick(FPS)
 
