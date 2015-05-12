@@ -7,6 +7,7 @@ import happ
 import happ2
 import ronerobot
 import analogjoystick
+import display2
 
 # Values of keys on the Happ device
 EAST_STICK = 8
@@ -37,6 +38,9 @@ class MSIControlBoard:
 
 	status = {}			# Status of all keys
 	stick = { 'x' : 0, 'y' : 0 }
+
+	loading = False
+	mode = 0
 
 	def __init__(self):
 		"""Initializes both devices to be used on the board, the Happ
@@ -127,10 +131,10 @@ class MSIControlBoard:
 	def updateStatusFly(self):
 		oldStatus = copy.copy(self.status)
 
-		self.status['r'] = self.happDevice2.getKeyStatus(1)
-		self.status['g'] = self.happDevice2.getKeyStatus(2)
-		self.status['b'] = self.happDevice2.getKeyStatus(3)
-		self.status['y'] = self.happDevice2.getKeyStatus(4)
+		self.status['r'] = self.happDevice2.getKeyStatus(2)
+		self.status['g'] = self.happDevice2.getKeyStatus(3)
+		self.status['b'] = self.happDevice2.getKeyStatus(4)
+		self.status['y'] = self.happDevice2.getKeyStatus(5)
 
 	def updateStatusJoystick(self):
 		oldStatus = copy.copy(self.status)
@@ -149,6 +153,7 @@ class MSIControlBoard:
 
 		xs = self.stick['x']
 		ys = self.stick['y']
+		
 
 		if abs(xs) < DZ:
 			xs = 0
@@ -161,7 +166,7 @@ class MSIControlBoard:
 			ys -= DZ
 
                 x = int(xs * 128)
-                y = int(ys * 128)
+                y = -int(ys * 128)
 		
                 x += 128
 		y += 128
@@ -171,11 +176,15 @@ class MSIControlBoard:
 		if y > 255:
 			y = 255
 
+		if x < 0:
+			x = 0
+		if y < 0:
+			y = 0
+
                 line = "UI"
 
-                line += hex(x)[2:]
-                line += hex(y)[2:]
-
+		line += "%02X%02X" % (x, y)
+		
 		buttonValue = 0
 
 		if self.status['b']:
@@ -245,15 +254,17 @@ class MSIControlBoard:
 		"""Sends a command to the robot currently attached.
 		"""
 		self.hostRobot.writeline(line)
+		print line[:-1]
 	
 	def _monitor(self):
 		while self.active:
 			f = False
 
+			oldstatus = self.status.copy()
+
 			if self.happDevice.device:
 				f = self.updateStatus()
                                 self.line = self.getCommandLine()
-                                continue
 
 			if self.happDevice2.device and \
 			    not self.happDevice.device:
@@ -268,6 +279,9 @@ class MSIControlBoard:
 	def getStatus(self):
 		return self.status
 
+	def getMode(self):
+		return 0
+
 	def _output(self):
 		while self.active:
 			self.sendCommandLine(self.line)
@@ -276,17 +290,10 @@ class MSIControlBoard:
 			if self.happDevice2:
 				self.happDevice2.clearInputs()
 
+
 if __name__ == "__main__":
 	msiBoard = MSIControlBoard()
 	msiBoard.start()
-
-	# display = display.Display(msiBoard)
-	# display.start()
-
-	try:
-		while True:
-			pass
-
-	except KeyboardInterrupt:
-		msiBoard.stop()
-		sys.exit(0)
+	
+	display = display2.Display(msiBoard)
+	display.start()

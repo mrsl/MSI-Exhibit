@@ -102,8 +102,6 @@ class RoneRobot:
 		if '\n' in line:
 			ss = self.line.split('\n')
 
-			print ss[0]
-
 			self.line = '\n'.join(ss[1:])
 
 	def _monitor(self):

@@ -90,6 +90,8 @@ class HappFlyDevice:
 		self.onKeys[k] = True
 		self.times[k] = time.time()
 
+		print self.onKeys
+
 	def getKeyStatus(self, key):
 		if key in self.onKeys:
 			return self.onKeys[key]

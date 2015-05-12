@@ -30,15 +30,15 @@ class Display:
 
 	def start(self):
 		pygame.display.init()
-		pygame.font.init()
+
+		print "Initializing display"
 
 		self.clock = pygame.time.Clock()
 
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			#pygame.FULLSCREEN | pygame.DOUBLEBUF,
-			pygame.DOUBLEBUF,
+			pygame.FULLSCREEN | pygame.DOUBLEBUF,
 			32
 		)
 
