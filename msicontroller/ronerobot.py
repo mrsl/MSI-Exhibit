@@ -63,7 +63,8 @@ class RoneRobot:
 			self.connection.write(line)
 
 		except:
-			self.disconnectFromRobot()
+			# self.disconnectFromRobot()
+			pass
 
 
 	def connectToRobot(self):

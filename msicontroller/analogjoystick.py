@@ -155,11 +155,6 @@ class AnalogJoystick:
 				if self.stick['x'] < -1.0:
 					self.stick['x'] = -1.0;
 
-		
-		if not self.x % 10:	
-			print self.stick, self.maxs, self.mins
-
-		self.x += 1
 
 		if 'lud' in readStat:
 			if readStat['lud'] > .5:

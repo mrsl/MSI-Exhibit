@@ -5,7 +5,7 @@ import re
 import threading
 
 INPUT_KEY = "800000 0 e0b0ffdf 1cfffff ffffffff fffffffe"
-TIMEOUT = 0.1 
+TIMEOUT = 0.4 
 
 def find_buttons():
         dev_file = open("/proc/bus/input/devices", "r")

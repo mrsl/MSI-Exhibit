@@ -145,7 +145,7 @@ class MSIControlBoard:
 
 	def getNewCommandLine(self):
 		if not self.status:
-			return "UI000000n"
+			return "UI000000000000000000\n"
 
 		xs = self.stick['x']
 		ys = self.stick['y']
@@ -193,7 +193,7 @@ class MSIControlBoard:
 
 		line += "%0.2x" % buttonValue
 
-		return line + "\n"
+		return line + "000000000000\n"
 
 
 	def getCommandLine(self):
