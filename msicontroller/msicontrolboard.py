@@ -22,6 +22,8 @@ BLUE_BUTTON = 33
 # How fast to write data to the robot
 OUTPUT_INTERVAL = 0.05
 
+DZ = 0.01
+
 class MSIControlBoard:
 	happDevice = None		# Happ Control Board for input
 	happDevice2 = None		# Happ Control Board for input
@@ -143,12 +145,31 @@ class MSIControlBoard:
 
 	def getNewCommandLine(self):
 		if not self.status:
-			return "UI000000\n"
+			return "UI000000n"
 
-                x = self.stick['x']
-                y = self.stick['y']
+		xs = self.stick['x']
+		ys = self.stick['y']
+
+		if abs(xs) < DZ:
+			xs = 0
+		else:
+			xs -= DZ
+
+		if abs(ys) < DZ:
+			ys = 0
+		else:
+			ys -= DZ
+
+                x = int(xs * 128)
+                y = int(ys * 128)
+		
                 x += 128
-                y += 128
+		y += 128
+
+		if x > 255:
+			x = 255
+		if y > 255:
+			y = 255
 
                 line = "UI"
 
@@ -163,11 +184,12 @@ class MSIControlBoard:
 		if self.status['g']:
 			buttonValue += 2
 
-		if self.status['r']:
-			buttonValue += 4
-
 		if self.status['y']:
-			buttonValue += 8
+			buttonValue += 4 
+		
+		if self.status['r']:
+			buttonValue += 8 
+
 
 		line += "%0.2x" % buttonValue
 
@@ -223,7 +245,7 @@ class MSIControlBoard:
 		"""Sends a command to the robot currently attached.
 		"""
 		self.hostRobot.writeline(line)
-
+	
 	def _monitor(self):
 		while self.active:
 			f = False
@@ -241,6 +263,7 @@ class MSIControlBoard:
 				f = self.updateStatusJoystick()
 
 			self.line = self.getNewCommandLine()
+			
 
 	def getStatus(self):
 		return self.status
@@ -249,6 +272,9 @@ class MSIControlBoard:
 		while self.active:
 			self.sendCommandLine(self.line)
 			time.sleep(OUTPUT_INTERVAL)
+
+			if self.happDevice2:
+				self.happDevice2.clearInputs()
 
 if __name__ == "__main__":
 	msiBoard = MSIControlBoard()

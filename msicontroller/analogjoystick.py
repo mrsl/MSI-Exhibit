@@ -1,15 +1,22 @@
 import threading
 import glob
 
+DM = 0.4
+
 class AnalogJoystick:
 	status = {}
 	stick = { 'x' : 0, 'y' : 0 }
+	maxs = { 'x' : DM, 'y' : DM }
+	mins = { 'x' : -DM, 'y' : -DM }
+	cens = { 'x' : 0, 'y' : 0 }
 
 	active = False
 
 	device = None		# USB Device
 	thread = None		# Monitor thread.
 
+
+	x = 0
 	def __init__(self):
 		for c in 'nesw':
 			self.status[c] = False
@@ -108,9 +115,51 @@ class AnalogJoystick:
 
 		if 'lud' in readStat:
 			self.stick['y'] = readStat['lud']
+			
+			if self.stick['y'] > self.maxs['y']:
+				self.maxs['y'] = self.stick['y']
+
+			if self.stick['y'] < self.mins['y']:
+				self.mins['y'] = self.stick['y']
+
+			if self.stick['y'] > self.cens['y']:
+				self.stick['y'] = self.stick['y'] / self.maxs['y']
+
+				if self.stick['y'] > 1.0:
+					self.stick['y'] = 1.0;
+			
+			if self.stick['y'] < self.cens['y']:
+				self.stick['y'] = -self.stick['y'] / self.mins['y']
+
+				if self.stick['y'] < -1.0:
+					self.stick['y'] = -1.0;
 
 		if 'llr' in readStat:
 			self.stick['x'] = readStat['llr']
+			
+			if self.stick['x'] > self.maxs['x']:
+				self.maxs['x'] = self.stick['x']
+
+			if self.stick['x'] < self.mins['x']:
+				self.mins['x'] = self.stick['x']
+			
+			if self.stick['x'] > self.cens['x']:
+				self.stick['x'] = self.stick['x'] / self.maxs['x']
+
+				if self.stick['x'] > 1.0:
+					self.stick['x'] = 1.0;
+			
+			if self.stick['x'] < self.cens['x']:
+				self.stick['x'] = -self.stick['x'] / self.mins['x']
+
+				if self.stick['x'] < -1.0:
+					self.stick['x'] = -1.0;
+
+		
+		if not self.x % 10:	
+			print self.stick, self.maxs, self.mins
+
+		self.x += 1
 
 		if 'lud' in readStat:
 			if readStat['lud'] > .5:

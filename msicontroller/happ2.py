@@ -4,7 +4,8 @@ import sys
 import re
 import threading
 
-INPUT_KEY = "80000000000000 e0b0ffdf01cfffff fffffffffffffffe"
+INPUT_KEY = "800000 0 e0b0ffdf 1cfffff ffffffff fffffffe"
+TIMEOUT = 0.1 
 
 def find_buttons():
         dev_file = open("/proc/bus/input/devices", "r")
@@ -41,6 +42,7 @@ class HappFlyDevice:
         thread = None # Monitor thread.
         device = None
 	onKeys = {}   # Current status of all keys.
+	times = {}
 
         def start(self):
 		"""Start monitor thread.
@@ -76,13 +78,17 @@ class HappFlyDevice:
         def clearDeviceData(self):
                 self.device = None
 
+	def clearInputs(self):
+		for k in self.times.keys():
+			if self.times[k] < time.time() - TIMEOUT:
+				self.onKeys[k] = False
+			
+
         def inputProcess(self, inputs):
-		for key in self.onKeys.keys():
-			self.onKeys[key] = False
-
-                self.onKeys[inputs[0]] = True
-
-                print self.onKeys
+		k = inputs[0]
+		
+		self.onKeys[k] = True
+		self.times[k] = time.time()
 
 	def getKeyStatus(self, key):
 		if key in self.onKeys:
