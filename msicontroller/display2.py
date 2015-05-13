@@ -8,8 +8,8 @@ import pygame
 from pygame.locals import *
 
 imagePrefix = "R-ONE SWARM_"
-# imageDir = "/home/mrsl/MSI-Exhibit/msicontroller/resources/"
-imageDir = "/home/zkk/arch/zkk/mrsl/MSI-Exhibit/msicontroller/resources/"
+imageDir = "/home/mrsl/MSI-Exhibit/msicontroller/resources/"
+#imageDir = "/home/zkk/arch/zkk/mrsl/MSI-Exhibit/msicontroller/resources/"
 
 IDLE = 0
 CLUSTER_ACTIVE = 1
@@ -40,8 +40,8 @@ class Display:
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			# pygame.FULLSCREEN | pygame.DOUBLEBUF,
-                        pygame.DOUBLEBUF,
+			pygame.FULLSCREEN | pygame.DOUBLEBUF,
+                        #pygame.DOUBLEBUF,
 			32
 		)
 

@@ -11,8 +11,9 @@ if __name__ == "__main__":
 	msiBoard = msicontrolboard.MSIControlBoard()
 	msiBoard.start()
 
-	display = display2.Display(msiBoard)
-	display.start()
+	if '-n' not in sys.argv:
+		display = display2.Display(msiBoard)
+		display.start()
 
 	try:
 		while True:

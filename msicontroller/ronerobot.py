@@ -6,6 +6,14 @@ import threading
 
 from serial import Serial
 
+IDLE = 0
+CLUSTER_ACTIVE = 1
+CLUSTER_LOADING = 2
+FLOCK_ACTIVE = 3
+FLOCK_LOADING = 4
+FOLLOW_ACTIVE = 5
+FOLLOW_LOADING = 6
+
 class RoneRobot:
 	"""Class for maintaining a connection to a r-one robot and writing data
 	over serial to the robot.
@@ -102,7 +110,13 @@ class RoneRobot:
 		if '\n' in line:
 			ss = self.line.split('\n')
 
+			l = ss[0]
+			self.mode =IDLE 
+
 			self.line = '\n'.join(ss[1:])
+	
+	def getMode(self):
+		return self.mode
 
 	def _monitor(self):
 		"""Maintain connection with a robot. Stays robust to unplugging
