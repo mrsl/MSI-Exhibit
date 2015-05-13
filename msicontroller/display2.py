@@ -8,7 +8,8 @@ import pygame
 from pygame.locals import *
 
 imagePrefix = "R-ONE SWARM_"
-imageDir = "/home/mrsl/MSI-Exhibit/msicontroller/resources/" 
+# imageDir = "/home/mrsl/MSI-Exhibit/msicontroller/resources/"
+imageDir = "/home/zkk/arch/zkk/mrsl/MSI-Exhibit/msicontroller/resources/"
 
 IDLE = 0
 CLUSTER_ACTIVE = 1
@@ -21,7 +22,7 @@ FOLLOW_LOADING = 6
 FPS = 10
 
 class Display:
-        SIZE = (0, 0)
+        SIZE = (656, 512)
 
 	mode = IDLE
 	tick = 0
@@ -39,7 +40,8 @@ class Display:
 		# Set display mode
 		self.screen = pygame.display.set_mode(
 			self.SIZE,
-			pygame.FULLSCREEN | pygame.DOUBLEBUF,
+			# pygame.FULLSCREEN | pygame.DOUBLEBUF,
+                        pygame.DOUBLEBUF,
 			32
 		)
 
@@ -102,7 +104,7 @@ class Display:
 		size = (int(aspect * height), height)
 
 		return pygame.transform.smoothscale(image, size)
-	
+
 	def scaleImage(self, image, size):
 		x, y = image.get_size()
 		aspect = float(x) / y
@@ -111,20 +113,25 @@ class Display:
 		return pygame.transform.smoothscale(image, size)
 
         def updateDisplay(self):
+                size = self.attractImg.get_size()
+                offset = tuple(-i / 2 for i in size)
+                center = tuple(i / 2 for i in self.size)
+                draw = tuple(offset[i] + center[i] for i in xrange(2))
+
                 if self.mode == IDLE:
-                        self.screen.blit(self.attractImg, (0, 0))
+                        self.screen.blit(self.attractImg, draw)
                 elif self.mode == CLUSTER_ACTIVE:
-                        self.screen.blit(self.clusteractiveImg, (0, 0))
+                        self.screen.blit(self.clusteractiveImg, draw)
                 elif self.mode == CLUSTER_LOADING:
-                        self.screen.blit(self.clusterloadingImg, (0, 0))
+                        self.screen.blit(self.clusterloadingImg, draw)
                 elif self.mode == FLOCK_ACTIVE:
-                        self.screen.blit(self.flockactiveImg, (0, 0))
+                        self.screen.blit(self.flockactiveImg, draw)
                 elif self.mode == FLOCK_LOADING:
-                        self.screen.blit(self.flockloadingImg, (0, 0))
+                        self.screen.blit(self.flockloadingImg, draw)
                 elif self.mode == FOLLOW_ACTIVE:
-                        self.screen.blit(self.followactiveImg, (0, 0))
+                        self.screen.blit(self.followactiveImg, draw)
                 elif self.mode == FOLLOW_LOADING:
-                        self.screen.blit(self.followloadingImg, (0, 0))
+                        self.screen.blit(self.followloadingImg, draw)
 
 		pygame.display.flip()
 

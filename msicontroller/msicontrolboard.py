@@ -129,8 +129,8 @@ class MSIControlBoard:
 	def updateStatusFly(self):
 		self.status['r'] = self.happDevice2.getKeyStatus(2)
 		self.status['b'] = self.happDevice2.getKeyStatus(3)
-		self.status['g'] = self.happDevice2.getKeyStatus(4)
-		self.status['y'] = self.happDevice2.getKeyStatus(5)
+		self.status['g'] = self.happDevice2.getKeyStatus(5)
+		self.status['y'] = self.happDevice2.getKeyStatus(4)
 
 	def updateStatusJoystick(self):
 		self.status['e'] = self.joystick.status['e']
@@ -147,7 +147,7 @@ class MSIControlBoard:
 
 		xs = self.stick['x']
 		ys = self.stick['y']
-		
+
 
 		if abs(xs) < DZ:
 			xs = 0
@@ -161,7 +161,7 @@ class MSIControlBoard:
 
                 x = int(xs * 128)
                 y = -int(ys * 128)
-		
+
                 x += 128
 		y += 128
 
@@ -178,7 +178,7 @@ class MSIControlBoard:
                 line = "UI"
 
 		line += "%02X%02X" % (x, y)
-		
+
 		buttonValue = 0
 
 		if self.status['b']:
@@ -188,10 +188,10 @@ class MSIControlBoard:
 			buttonValue += 2
 
 		if self.status['y']:
-			buttonValue += 4 
-		
+			buttonValue += 4
+
 		if self.status['r']:
-			buttonValue += 8 
+			buttonValue += 8
 
 
 		line += "%0.2x" % buttonValue
@@ -248,7 +248,7 @@ class MSIControlBoard:
 		"""Sends a command to the robot currently attached.
 		"""
 		self.hostRobot.writeline(line)
-	
+
 	def _monitor(self):
 		while self.active:
 			f = False
@@ -267,7 +267,7 @@ class MSIControlBoard:
 				f = self.updateStatusJoystick()
 
 			self.line = self.getNewCommandLine()
-			
+
 
 	def getStatus(self):
 		return self.status
@@ -287,6 +287,6 @@ class MSIControlBoard:
 if __name__ == "__main__":
 	msiBoard = MSIControlBoard()
 	msiBoard.start()
-	
+
 	display = display2.Display(msiBoard)
 	display.start()
