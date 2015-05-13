@@ -8,6 +8,7 @@ import pygame
 from pygame.locals import *
 
 imagePrefix = "R-ONE SWARM_"
+imageDir = "/home/mrsl/MSI-Exhibit/msicontroller/resources/" 
 
 IDLE = 0
 CLUSTER_ACTIVE = 1
@@ -20,7 +21,7 @@ FOLLOW_LOADING = 6
 FPS = 10
 
 class Display:
-        SIZE = (1300, 700)
+        SIZE = (0, 0)
 
 	mode = IDLE
 	tick = 0
@@ -52,44 +53,38 @@ class Display:
 		pygame.mouse.set_visible(False)
 
 		# Open resources
-		riceImg = self.openImage("resources/rice.png")
-		self.riceImg = self.scaleImageOnHeight(riceImg, 100)
-
-		mrslImg = self.openImage("resources/mrsl.png")
-		self.mrslImg = self.scaleImageOnHeight(mrslImg, 75)
-
                 attractImg = \
-                    self.openImage("resources/" + imagePrefix + "attract.png")
+                    self.openImage(imageDir + imagePrefix + "attract.png")
                 self.attractImg = \
                     self.scaleImageOnHeight(attractImg, self.size[1])
 
                 clusteractiveImg = \
-                    self.openImage("resources/" + imagePrefix + "cluster active.png")
+                    self.openImage(imageDir + imagePrefix + "cluster active.png")
                 self.clusteractiveImg = \
                     self.scaleImageOnHeight(clusteractiveImg, self.size[1])
 
                 clusterloadingImg = \
-                    self.openImage("resources/" + imagePrefix + "cluster loading.png")
+                    self.openImage(imageDir + imagePrefix + "cluster loading.png")
                 self.clusterloadingImg = \
                     self.scaleImageOnHeight(clusterloadingImg, self.size[1])
 
                 flockactiveImg = \
-                    self.openImage("resources/" + imagePrefix + "flock active.png")
+                    self.openImage(imageDir + imagePrefix + "flock active.png")
                 self.flockactiveImg = \
                     self.scaleImageOnHeight(flockactiveImg, self.size[1])
 
                 flockloadingImg = \
-                    self.openImage("resources/" + imagePrefix + "flock loading.png")
+                    self.openImage(imageDir + imagePrefix + "flock loading.png")
                 self.flockloadingImg = \
                     self.scaleImageOnHeight(flockloadingImg, self.size[1])
 
                 followactiveImg = \
-                    self.openImage("resources/" + imagePrefix + "follow active.png")
+                    self.openImage(imageDir + imagePrefix + "follow active.png")
                 self.followactiveImg = \
                     self.scaleImageOnHeight(followactiveImg, self.size[1])
 
                 followloadingImg = \
-                    self.openImage("resources/" + imagePrefix + "follow loading.png")
+                    self.openImage(imageDir + imagePrefix + "follow loading.png")
                 self.followloadingImg = \
                     self.scaleImageOnHeight(followloadingImg, self.size[1])
 
@@ -105,6 +100,13 @@ class Display:
 		x, y = image.get_size()
 		aspect = float(x) / y
 		size = (int(aspect * height), height)
+
+		return pygame.transform.smoothscale(image, size)
+	
+	def scaleImage(self, image, size):
+		x, y = image.get_size()
+		aspect = float(x) / y
+		size = (int(aspect * height), int(aspect * width))
 
 		return pygame.transform.smoothscale(image, size)
 

@@ -5,14 +5,14 @@ import time
 import threading
 
 import msicontrolboard
-import display
+import display2
 
 if __name__ == "__main__":
 	msiBoard = msicontrolboard.MSIControlBoard()
 	msiBoard.start()
 
-	# display = display.Display(msiBoard)
-	# display.start()
+	display = display2.Display(msiBoard)
+	display.start()
 
 	try:
 		while True:

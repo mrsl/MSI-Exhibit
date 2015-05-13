@@ -116,8 +116,6 @@ class MSIControlBoard:
 		"""Updates status of all keys on the board. Returns True if
 		there was a change, false if there was not.
 		"""
-		oldStatus = copy.copy(self.status)
-
 		self.status['e'] = self.happDevice.getKeyStatus(EAST_STICK)
 		self.status['n'] = self.happDevice.getKeyStatus(NORTH_STICK)
 		self.status['s'] = self.happDevice.getKeyStatus(SOUTH_STICK)
@@ -129,16 +127,12 @@ class MSIControlBoard:
 		self.status['b'] = self.happDevice.getKeyStatus(BLUE_BUTTON)
 
 	def updateStatusFly(self):
-		oldStatus = copy.copy(self.status)
-
 		self.status['r'] = self.happDevice2.getKeyStatus(2)
-		self.status['g'] = self.happDevice2.getKeyStatus(3)
-		self.status['b'] = self.happDevice2.getKeyStatus(4)
+		self.status['b'] = self.happDevice2.getKeyStatus(3)
+		self.status['g'] = self.happDevice2.getKeyStatus(4)
 		self.status['y'] = self.happDevice2.getKeyStatus(5)
 
 	def updateStatusJoystick(self):
-		oldStatus = copy.copy(self.status)
-
 		self.status['e'] = self.joystick.status['e']
 		self.status['n'] = self.joystick.status['n']
 		self.status['s'] = self.joystick.status['s']
@@ -254,7 +248,6 @@ class MSIControlBoard:
 		"""Sends a command to the robot currently attached.
 		"""
 		self.hostRobot.writeline(line)
-		print line[:-1]
 	
 	def _monitor(self):
 		while self.active:
