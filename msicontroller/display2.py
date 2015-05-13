@@ -22,7 +22,8 @@ FOLLOW_LOADING = 6
 FPS = 10
 
 class Display:
-        SIZE = (656, 512)
+        # SIZE = (656, 512)
+	SIZE = (0, 0)
 
 	mode = IDLE
 	tick = 0

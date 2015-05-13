@@ -14,6 +14,11 @@ FLOCK_LOADING = 4
 FOLLOW_ACTIVE = 5
 FOLLOW_LOADING = 6
 
+MODE_IDLE = 0
+MODE_FOLLOW = 1
+MODE_FLOCK = 2
+MODE_CLUSTER = 3
+
 class RoneRobot:
 	"""Class for maintaining a connection to a r-one robot and writing data
 	over serial to the robot.
@@ -22,6 +27,7 @@ class RoneRobot:
 	active = False		# Is the thread active?
 	thread = None		# Thread object for monitoring robot
 	line = ""
+        mode = IDLE
 
 	def __init__(self):
 		"""Constructor. Doesn't do much.
@@ -111,10 +117,42 @@ class RoneRobot:
 			ss = self.line.split('\n')
 
 			l = ss[0]
-			self.mode =IDLE 
+                        if "MSIExhibit" in l:
+                                try:
+                                        tag, mode, building = l.split()
+                                        junk, mode = mode.split("=")
+                                        junk, building = building.split("=")
+
+                                        mode = int(mode)
+                                        building = int(building)
+
+                                        if mode == MODE_IDLE:
+                                                self.mode = IDLE
+
+                                        if mode == MODE_FOLLOW:
+                                                if building:
+                                                        self.mode = FOLLOW_LOADING
+                                                else:
+                                                        self.mode = FOLLOW_ACTIVE
+
+                                        if mode == MODE_FLOCK:
+                                                if building:
+                                                        self.mode = FLOCK_LOADING
+                                                else:
+                                                        self.mode = FLOCK_ACTIVE
+
+                                        if mode == MODE_CLUSTER:
+                                                if building:
+                                                        self.mode = CLUSTER_LOADING
+                                                else:
+                                                        self.mode = CLUSTER_ACTIVE
+
+                                except Exception as e:
+                                        print e.strerror
+                                        pass
 
 			self.line = '\n'.join(ss[1:])
-	
+
 	def getMode(self):
 		return self.mode
 

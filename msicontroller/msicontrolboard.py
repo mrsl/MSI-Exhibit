@@ -280,6 +280,8 @@ class MSIControlBoard:
 			self.sendCommandLine(self.line)
 			time.sleep(OUTPUT_INTERVAL)
 
+			self.mode = self.hostRobot.getMode()
+
 			if self.happDevice2:
 				self.happDevice2.clearInputs()
 
